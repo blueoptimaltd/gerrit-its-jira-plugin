@@ -19,8 +19,11 @@ import com.google.common.cache.LoadingCache;
 import com.google.gerrit.extensions.events.GitReferenceUpdatedListener;
 import com.google.gerrit.extensions.registration.DynamicSet;
 import com.google.gerrit.server.cache.CacheModule;
+import com.google.gerrit.server.cache.ReplicatedCache;
+import com.google.gerrit.server.replication.coordinators.ReplicatedEventsCoordinator;
 import com.google.inject.Inject;
 import com.google.inject.Module;
+import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import java.util.concurrent.ExecutionException;
 import org.slf4j.Logger;
@@ -28,13 +31,14 @@ import org.slf4j.LoggerFactory;
 
 class JiraItsServerCacheImpl implements JiraItsServerCache {
   private static final Logger log = LoggerFactory.getLogger(JiraItsServerCacheImpl.class);
+  @ReplicatedCache
   private static final String CACHE_NAME = "jira_server_project";
 
   private final LoadingCache<String, JiraItsServerInfo> cache;
 
   @Inject
-  JiraItsServerCacheImpl(@Named(CACHE_NAME) LoadingCache<String, JiraItsServerInfo> cache) {
-    this.cache = cache;
+  JiraItsServerCacheImpl(@Named(CACHE_NAME) LoadingCache<String, JiraItsServerInfo> cache, Provider<ReplicatedEventsCoordinator> replicatedEventsCoordinator) {
+    this.cache = replicatedEventsCoordinator.get().createReplicatedLoadingCache(CACHE_NAME, cache, projectName -> projectName);
   }
 
   @Override

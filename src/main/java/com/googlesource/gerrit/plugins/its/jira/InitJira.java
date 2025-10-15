@@ -115,7 +115,9 @@ class InitJira extends InitIts {
     ui.header("Jira issue-tracking association");
     jiraComment.string("Jira issue-Id regex", "match", "([A-Z]+-[0-9]+)");
     jiraComment.string(
-        "What link would you like to use?", "link", String.format("%s/browse/$1", jiraUrl));
+        "What link would you like to use?",
+        "link",
+        String.format("%s%s", jiraUrl, JiraURL.URL_SUFFIX.substring(1)));
 
     Section pluginConfig = sections.get("plugin", pluginName);
 
